@@ -1,0 +1,236 @@
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 25px 30px;
+            border-bottom: 5px solid #3498db;
+        }
+        
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        
+        header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 0;
+        }
+        
+        .image-section {
+            flex: 1;
+            min-width: 300px;
+            background-color: #f8f9fa;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid #eee;
+        }
+        
+        .booking-card {
+            width: 100%;
+            max-width: 350px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background-color: #3498db;
+            color: white;
+            padding: 18px;
+            text-align: center;
+        }
+        
+        .card-header h3 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .card-body {
+            padding: 25px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        
+        .input-with-icon {
+            position: relative;
+        }
+        
+        .input-with-icon i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7f8c8d;
+        }
+        
+        .booking-section {
+            flex: 1;
+            min-width: 300px;
+            padding: 30px;
+        }
+        
+        .price-display {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 25px;
+            border-left: 4px solid #2ecc71;
+            transition: all 0.3s ease;
+        }
+        
+        .price-display h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .price-breakdown {
+            margin: 15px 0;
+        }
+        
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #eee;
+        }
+        
+        .price-item.total {
+            border-top: 2px solid #ddd;
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 18px;
+            color: #2c3e50;
+            padding-top: 15px;
+            margin-top: 10px;
+        }
+        
+        .final-price {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2ecc71;
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 6px;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .time-indicator {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            color: #7f8c8d;
+            font-size: 15px;
+        }
+        
+        .time-indicator i {
+            margin-right: 10px;
+            color: #3498db;
+        }
+        
+        .mock-api-info {
+            background-color: #fef9e7;
+            border: 1px dashed #f39c12;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 25px;
+            font-size: 14px;
+            color: #7d6608;
+        }
+        
+        .mock-api-info h5 {
+            color: #d35400;
+            margin-bottom: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .image-section {
+                border-right: none;
+                border-bottom: 1px solid #eee;
+            }
+        }
+  

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Booking Demo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+       <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-hotel"></i> Luxury Hotel Booking</h1>
+            <p>Book your stay with us - Simple, fast, and secure</p>
+        </header>
+        
+        <div class="content">
+            <div class="image-section">
+                <div class="booking-card">
+                    <div class="card-header">
+                        <h3>Booking Details</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="time-indicator">
+                            <i class="fas fa-clock"></i>
+                            <span>Arrival time: <strong id="arrivalTime">45 minutes</strong></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="guests"><i class="fas fa-users"></i> Number of Guests</label>
+                            <div class="input-with-icon">
+                                <input type="number" id="guests" class="form-control" min="1" max="10" value="1">
+                                <i class="fas fa-user-friends"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="roomType"><i class="fas fa-bed"></i> Room Type</label>
+                            <select id="roomType" class="form-control">
+                                <option value="standard">Standard Room</option>
+                                <option value="deluxe" selected>Deluxe Room</option>
+                                <option value="suite">Executive Suite</option>
+                                <option value="family">Family Suite</option>
+                            </select>
+                        </div>
+                        
+                        <button id="calculatePrice" class="btn">
+                            <i class="fas fa-calculator"></i> Calculate Total Price
+                        </button>
+                        
+                        <div class="price-display" id="priceDisplay" style="display: none;">
+                            <h4><i class="fas fa-receipt"></i> Price Breakdown</h4>
+                            <div class="price-breakdown">
+                                <div class="price-item">
+                                    <span>Room price:</span>
+                                    <span id="roomPrice">$0</span>
+                                </div>
+                                <div class="price-item">
+                                    <span>Service fee:</span>
+                                    <span id="serviceFee">$20</span>
+                                </div>
+                                <div class="price-item total">
+                                    <span>Total price:</span>
+                                    <span id="totalPrice">$0</span>
+                                </div>
+                            </div>
+                            <div class="final-price" id="finalPrice">
+                                $0
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mock-api-info">
+                    <h5><i class="fas fa-info-circle"></i> API Integration Note</h5>
+                    <p>This demo simulates API calls. In production, replace the mock API with your actual endpoint to fetch real room prices from your database or Excel sheet.</p>
+                </div>
+            </div>
+            
+            <div class="booking-section">
+                <h2>Complete Your Reservation</h2>
+                <p>Fill in your details to secure your booking. The price shown includes all taxes and our service fee.</p>
+                
+                <div class="form-group">
+                    <label for="fullName"><i class="fas fa-user"></i> Full Name</label>
+                    <input type="text" id="fullName" class="form-control" placeholder="Enter your full name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email"><i class="fas fa-envelope"></i> Email Address</label>
+                    <input type="email" id="email" class="form-control" placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone"><i class="fas fa-phone"></i> Phone Number</label>
+                    <input type="tel" id="phone" class="form-control" placeholder="Enter your phone number">
+                </div>
+                
+                <div class="form-group">
+                    <label for="arrivalDate"><i class="fas fa-calendar-alt"></i> Arrival Date</label>
+                    <input type="date" id="arrivalDate" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="specialRequests"><i class="fas fa-comment-alt"></i> Special Requests (Optional)</label>
+                    <textarea id="specialRequests" class="form-control" rows="3" placeholder="Any special requirements?"></textarea>
+                </div>
+                
+                <button id="confirmBooking" class="btn" style="background-color: #2ecc71;">
+                    <i class="fas fa-check-circle"></i> Confirm Booking
+                </button>
+                
+                <div class="price-display" style="margin-top: 30px; background-color: #e8f4fc;">
+                    <h4><i class="fas fa-lightbulb"></i> How It Works</h4>
+                    <p>1. Select number of guests and room type</p>
+                    <p>2. Click "Calculate Total Price" to see the price with our $20 service fee</p>
+                    <p>3. Fill in your details and confirm booking</p>
+                    <p>4. Tomorrow, we'll connect this to your actual Excel data via API</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script.src="logic.js"></script>
+</body>
+</html>
