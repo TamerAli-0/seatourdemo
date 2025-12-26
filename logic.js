@@ -1,138 +1,272 @@
+// Configuration
+const SERVICE_FEE = 20;
 
-        // Mock API to simulate fetching room prices
-        // In production, replace this with a real API call
-        const mockRoomPrices = {
-            'standard': { basePrice: 800, name: 'Standard Room' },
-            'deluxe': { basePrice: 1000, name: 'Deluxe Room' },
-            'suite': { basePrice: 1500, name: 'Executive Suite' },
-            'family': { basePrice: 1800, name: 'Family Suite' }
+// DOM elements
+const guestsInput = document.getElementById('guests');
+const roomTypeSelect = document.getElementById('roomType');
+const calculateButton = document.getElementById('calculatePrice');
+const priceDisplay = document.getElementById('priceDisplay');
+const roomPriceElement = document.getElementById('roomPrice');
+const serviceFeeElement = document.getElementById('serviceFee');
+const totalPriceElement = document.getElementById('totalPrice');
+const finalPriceElement = document.getElementById('finalPrice');
+const apiStatusElement = document.getElementById('apiStatus');
+const testConnectionButton = document.getElementById('testConnection');
+
+// Google Sheets configuration elements
+const sheetIdInput = document.getElementById('sheetId');
+const apiKeyInput = document.getElementById('apiKey');
+const sheetRangeInput = document.getElementById('sheetRange');
+
+// Cache for fetched prices
+let priceCache = {};
+let lastFetchTime = 0;
+const CACHE_DURATION = 300000; // 5 minutes
+
+// Default configuration (you can pre-fill these)
+const DEFAULT_CONFIG = {
+    sheetId: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms', // Example sheet
+    apiKey: 'AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY', // Example key
+    range: 'Sheet1!A1:D10'
+};
+
+// Load saved configuration
+function loadConfig() {
+    const savedSheetId = localStorage.getItem('hotelSheetId');
+    const savedApiKey = localStorage.getItem('hotelApiKey');
+    const savedRange = localStorage.getItem('hotelRange');
+    
+    sheetIdInput.value = savedSheetId || DEFAULT_CONFIG.sheetId;
+    apiKeyInput.value = savedApiKey || DEFAULT_CONFIG.apiKey;
+    sheetRangeInput.value = savedRange || DEFAULT_CONFIG.range;
+}
+
+// Save configuration
+function saveConfig() {
+    localStorage.setItem('hotelSheetId', sheetIdInput.value);
+    localStorage.setItem('hotelApiKey', apiKeyInput.value);
+    localStorage.setItem('hotelRange', sheetRangeInput.value);
+}
+
+// Fetch room price from Google Sheets
+async function fetchPriceFromGoogleSheets(roomCode) {
+    const sheetId = sheetIdInput.value.trim();
+    const apiKey = apiKeyInput.value.trim();
+    const range = sheetRangeInput.value.trim();
+    
+    if (!sheetId || !apiKey || !range) {
+        throw new Error('Please configure Google Sheets API settings first');
+    }
+    
+    // Check cache
+    const cacheKey = `${sheetId}-${range}`;
+    const now = Date.now();
+    
+    if (priceCache[cacheKey] && (now - lastFetchTime) < CACHE_DURATION) {
+        console.log('Using cached prices');
+        return findPriceInData(priceCache[cacheKey], roomCode);
+    }
+    
+    // Build the Google Sheets API URL
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${apiKey}`;
+    
+    // Show loading status
+    apiStatusElement.textContent = 'Fetching prices from Google Sheets...';
+    apiStatusElement.className = 'status loading';
+    
+    try {
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.values || data.values.length === 0) {
+            throw new Error('No data found in the specified range');
+        }
+        
+        // Cache the data
+        priceCache[cacheKey] = data.values;
+        lastFetchTime = now;
+        
+        // Update status
+        apiStatusElement.textContent = `Prices loaded successfully (${data.values.length} rows)`;
+        apiStatusElement.className = 'status success';
+        
+        // Find the price for the requested room
+        return findPriceInData(data.values, roomCode);
+        
+    } catch (error) {
+        apiStatusElement.textContent = `Error: ${error.message}`;
+        apiStatusElement.className = 'status error';
+        throw error;
+    }
+}
+
+// Find price in Google Sheets data
+function findPriceInData(sheetData, roomCode) {
+    // Try to find room code in first column
+    for (let i = 0; i < sheetData.length; i++) {
+        const row = sheetData[i];
+        if (row[0] && row[0].trim().toUpperCase() === roomCode.toUpperCase()) {
+            // Try to find price in the row (check different columns)
+            for (let j = 1; j < row.length; j++) {
+                const priceMatch = row[j]?.match(/(\d+\.?\d*)/);
+                if (priceMatch) {
+                    return parseFloat(priceMatch[1]);
+                }
+            }
+        }
+    }
+    
+    // Fallback: Use default prices if not found
+    const defaultPrices = {
+        'A': 800,
+        'B': 1000,
+        'C': 1500,
+        'D': 1800
+    };
+    
+    return defaultPrices[roomCode] || 1000;
+}
+
+// Calculate and display the total price
+async function calculateTotalPrice() {
+    const guests = parseInt(guestsInput.value) || 1;
+    const roomCode = roomTypeSelect.value;
+    
+    // Show loading state
+    calculateButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Fetching from Google Sheets...';
+    calculateButton.disabled = true;
+    priceDisplay.style.display = 'none';
+    
+    try {
+        // Fetch the base room price from Google Sheets
+        const basePrice = await fetchPriceFromGoogleSheets(roomCode);
+        
+        // Calculate total
+        const totalPrice = basePrice + SERVICE_FEE;
+        
+        // Update the display
+        roomPriceElement.textContent = `$${basePrice.toFixed(2)}`;
+        serviceFeeElement.textContent = `$${SERVICE_FEE.toFixed(2)}`;
+        totalPriceElement.textContent = `$${totalPrice.toFixed(2)}`;
+        finalPriceElement.textContent = `$${totalPrice.toFixed(2)}`;
+        
+        // Show the price display
+        priceDisplay.style.display = 'block';
+        
+        // Update button text
+        calculateButton.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Price';
+        
+        // Log for debugging
+        console.log(`Price calculated: Base $${basePrice} + Service $${SERVICE_FEE} = Total $${totalPrice}`);
+    } catch (error) {
+        console.error('Error fetching room price:', error);
+        
+        // Show error to user
+        apiStatusElement.textContent = `Error: ${error.message}. Using default price.`;
+        apiStatusElement.className = 'status error';
+        
+        // Use default price as fallback
+        const defaultPrices = {
+            'A': 800,
+            'B': 1000,
+            'C': 1500,
+            'D': 1800
         };
         
-        // Service fee (fixed)
-        const SERVICE_FEE = 20;
+        const basePrice = defaultPrices[roomCode] || 1000;
+        const totalPrice = basePrice + SERVICE_FEE;
         
-        // DOM elements
-        const guestsInput = document.getElementById('guests');
-        const roomTypeSelect = document.getElementById('roomType');
-        const calculateButton = document.getElementById('calculatePrice');
-        const priceDisplay = document.getElementById('priceDisplay');
-        const roomPriceElement = document.getElementById('roomPrice');
-        const serviceFeeElement = document.getElementById('serviceFee');
-        const totalPriceElement = document.getElementById('totalPrice');
-        const finalPriceElement = document.getElementById('finalPrice');
-        const confirmBookingButton = document.getElementById('confirmBooking');
-        const arrivalTimeElement = document.getElementById('arrivalTime');
+        roomPriceElement.textContent = `$${basePrice.toFixed(2)}`;
+        serviceFeeElement.textContent = `$${SERVICE_FEE.toFixed(2)}`;
+        totalPriceElement.textContent = `$${totalPrice.toFixed(2)}`;
+        finalPriceElement.textContent = `$${totalPrice.toFixed(2)}`;
+        priceDisplay.style.display = 'block';
         
-        // Simulate fetching room price from API
-        function fetchRoomPrice(roomType) {
-            // In production, replace this with:
-            // fetch('https://your-api-endpoint.com/room-price')
-            //   .then(response => response.json())
-            //   .then(data => data.price)
-            
-            // For demo, simulate API delay
-            return new Promise(resolve => {
-                setTimeout(() => {
-                    resolve(mockRoomPrices[roomType].basePrice);
-                }, 300);
-            });
-        }
+        calculateButton.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Try Again';
+    } finally {
+        calculateButton.disabled = false;
+    }
+}
+
+// Test Google Sheets connection
+async function testConnection() {
+    saveConfig();
+    
+    try {
+        apiStatusElement.textContent = 'Testing connection to Google Sheets...';
+        apiStatusElement.className = 'status loading';
         
-        // Calculate and display the total price
-        async function calculateTotalPrice() {
-            const guests = parseInt(guestsInput.value) || 1;
-            const roomType = roomTypeSelect.value;
-            
-            // Show loading state
-            calculateButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Calculating...';
-            calculateButton.disabled = true;
-            
-            try {
-                // Fetch the base room price (simulated API call)
-                const basePrice = await fetchRoomPrice(roomType);
-                
-                // Calculate total
-                const totalPrice = basePrice + SERVICE_FEE;
-                
-                // Update the display
-                roomPriceElement.textContent = `$${basePrice}`;
-                serviceFeeElement.textContent = `$${SERVICE_FEE}`;
-                totalPriceElement.textContent = `$${totalPrice}`;
-                finalPriceElement.textContent = `$${totalPrice}`;
-                
-                // Show the price display
-                priceDisplay.style.display = 'block';
-                
-                // Update button text
-                calculateButton.innerHTML = '<i class="fas fa-sync-alt"></i> Recalculate Price';
-                
-                // Log for debugging
-                console.log(`Price calculated: Base $${basePrice} + Service $${SERVICE_FEE} = Total $${totalPrice}`);
-            } catch (error) {
-                console.error('Error fetching room price:', error);
-                alert('Unable to fetch room price. Please try again.');
-            } finally {
-                calculateButton.disabled = false;
-            }
-        }
+        // Try to fetch a small range to test connection
+        const testData = await fetchPriceFromGoogleSheets('A');
         
-        // Generate random arrival time (for demo purposes)
-        function updateArrivalTime() {
-            const times = ['30 minutes', '45 minutes', '1 hour', '1 hour 15 minutes', '1.5 hours'];
-            const randomTime = times[Math.floor(Math.random() * times.length)];
-            arrivalTimeElement.textContent = randomTime;
-        }
+        apiStatusElement.textContent = `Connection successful! Sample price: $${testData}`;
+        apiStatusElement.className = 'status success';
         
-        // Handle booking confirmation
-        function confirmBooking() {
-            const fullName = document.getElementById('fullName').value;
-            const email = document.getElementById('email').value;
-            
-            if (!fullName || !email) {
-                alert('Please fill in your name and email to confirm booking.');
-                return;
-            }
-            
-            const roomType = roomTypeSelect.value;
-            const roomName = mockRoomPrices[roomType].name;
-            const guests = guestsInput.value;
-            const totalPrice = totalPriceElement.textContent;
-            
-            // In production, this would send data to your backend
-            alert(`Booking confirmed for ${guests} guest(s) in ${roomName}!\nTotal: ${totalPrice}\nConfirmation will be sent to ${email}\n\nNote: This is a demo. Tomorrow we'll connect to your Excel data.`);
-            
-            // Reset form for demo purposes
-            document.getElementById('fullName').value = '';
-            document.getElementById('email').value = '';
-            document.getElementById('phone').value = '';
-            document.getElementById('arrivalDate').value = '';
-            document.getElementById('specialRequests').value = '';
-        }
+        // Auto-calculate price after successful connection
+        setTimeout(calculateTotalPrice, 500);
         
-        // Event listeners
-        calculateButton.addEventListener('click', calculateTotalPrice);
-        confirmBookingButton.addEventListener('click', confirmBooking);
-        
-        // Initialize the demo
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set default arrival date to tomorrow
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            document.getElementById('arrivalDate').valueAsDate = tomorrow;
-            
-            // Set initial arrival time
-            updateArrivalTime();
-            
-            // Calculate initial price
-            calculateTotalPrice();
-            
-            // Update arrival time every 30 seconds for demo effect
-            setInterval(updateArrivalTime, 30000);
-            
-            // Log instructions for tomorrow's integration
-            console.log('DEMO INSTRUCTIONS FOR TOMORROW:');
-            console.log('1. Replace fetchRoomPrice() function with actual API call to your backend');
-            console.log('2. The API should return the base price for the selected room type');
-            console.log('3. The system will automatically add $20 service fee');
-            console.log('4. Connect to your Excel sheet via backend API');
-        });
+    } catch (error) {
+        apiStatusElement.textContent = `Connection failed: ${error.message}`;
+        apiStatusElement.className = 'status error';
+    }
+}
+
+// Handle booking confirmation
+function confirmBooking() {
+    const fullName = document.getElementById('fullName').value;
+    const email = document.getElementById('email').value;
+    
+    if (!fullName || !email) {
+        alert('Please fill in your name and email to confirm booking.');
+        return;
+    }
+    
+    const roomType = roomTypeSelect.options[roomTypeSelect.selectedIndex].text;
+    const guests = guestsInput.value;
+    const totalPrice = totalPriceElement.textContent;
+    
+    alert(`Booking confirmed for ${guests} guest(s) in ${roomType}!\nTotal: ${totalPrice}\nConfirmation will be sent to ${email}`);
+    
+    // Reset form
+    document.getElementById('fullName').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('arrivalDate').value = '';
+}
+
+// Initialize the application
+document.addEventListener('DOMContentLoaded', function() {
+    // Set default arrival date to tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('arrivalDate').valueAsDate = tomorrow;
+    
+    // Load saved configuration
+    loadConfig();
+    
+    // Event listeners
+    calculateButton.addEventListener('click', calculateTotalPrice);
+    testConnectionButton.addEventListener('click', testConnection);
+    document.getElementById('confirmBooking').addEventListener('click', confirmBooking);
+    
+    // Save config when inputs change
+    sheetIdInput.addEventListener('change', saveConfig);
+    apiKeyInput.addEventListener('change', saveConfig);
+    sheetRangeInput.addEventListener('change', saveConfig);
+    
+    // Auto-calculate price on room type change
+    roomTypeSelect.addEventListener('change', calculateTotalPrice);
+    
+    // Show initial instructions
+    apiStatusElement.textContent = 'Configure Google Sheets API to get started';
+    apiStatusElement.className = 'status';
+    
+    // Auto-test connection if config exists
+    if (sheetIdInput.value && apiKeyInput.value) {
+        setTimeout(testConnection, 1000);
+    }
+});

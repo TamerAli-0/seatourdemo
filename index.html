@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hotel Booking Demo1</title>
+    <title>Hotel Booking - Google Sheets Integration</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-       <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-hotel"></i> Luxury Hotel Booking</h1>
-            <p>Book your stay with us - Simple, fast, and secure</p>
+            <h1><i class="fas fa-hotel"></i> Hotel Booking System</h1>
+            <p>Dynamic pricing from Google Sheets + $20 service fee</p>
         </header>
         
         <div class="content">
@@ -37,22 +37,22 @@
                         <div class="form-group">
                             <label for="roomType"><i class="fas fa-bed"></i> Room Type</label>
                             <select id="roomType" class="form-control">
-                                <option value="standard">Standard Room</option>
-                                <option value="deluxe" selected>Deluxe Room</option>
-                                <option value="suite">Executive Suite</option>
-                                <option value="family">Family Suite</option>
+                                <option value="A">Standard Room (A)</option>
+                                <option value="B" selected>Deluxe Room (B)</option>
+                                <option value="C">Executive Suite (C)</option>
+                                <option value="D">Family Suite (D)</option>
                             </select>
                         </div>
                         
                         <button id="calculatePrice" class="btn">
-                            <i class="fas fa-calculator"></i> Calculate Total Price
+                            <i class="fas fa-calculator"></i> Get Price from Google Sheets
                         </button>
                         
                         <div class="price-display" id="priceDisplay" style="display: none;">
                             <h4><i class="fas fa-receipt"></i> Price Breakdown</h4>
                             <div class="price-breakdown">
                                 <div class="price-item">
-                                    <span>Room price:</span>
+                                    <span>Base room price:</span>
                                     <span id="roomPrice">$0</span>
                                 </div>
                                 <div class="price-item">
@@ -68,12 +68,35 @@
                                 $0
                             </div>
                         </div>
+                        
+                        <div id="apiStatus" class="status"></div>
                     </div>
                 </div>
                 
-                <div class="mock-api-info">
-                    <h5><i class="fas fa-info-circle"></i> API Integration Note</h5>
-                    <p>This demo simulates API calls. In production, replace the mock API with your actual endpoint to fetch real room prices from your database or Excel sheet.</p>
+                <div class="api-config">
+                    <h5><i class="fas fa-cogs"></i> Google Sheets Configuration</h5>
+                    
+                    <div class="config-input">
+                        <label for="sheetId">Google Sheet ID:</label>
+                        <input type="text" id="sheetId" placeholder="Enter your Google Sheet ID">
+                        <small>Example: 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms</small>
+                    </div>
+                    
+                    <div class="config-input">
+                        <label for="apiKey">Google Sheets API Key:</label>
+                        <input type="text" id="apiKey" placeholder="Enter your API key">
+                        <small>Get it from Google Cloud Console</small>
+                    </div>
+                    
+                    <div class="config-input">
+                        <label for="sheetRange">Sheet Range (A1 notation):</label>
+                        <input type="text" id="sheetRange" value="Sheet1!A1:D10" placeholder="Sheet1!A1:D10">
+                        <small>Range that contains room types and prices</small>
+                    </div>
+                    
+                    <button id="testConnection" class="btn" style="padding: 10px; font-size: 14px; margin-top: 10px;">
+                        <i class="fas fa-plug"></i> Test Connection
+                    </button>
                 </div>
             </div>
             
@@ -92,34 +115,30 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="phone"><i class="fas fa-phone"></i> Phone Number</label>
-                    <input type="tel" id="phone" class="form-control" placeholder="Enter your phone number">
-                </div>
-                
-                <div class="form-group">
                     <label for="arrivalDate"><i class="fas fa-calendar-alt"></i> Arrival Date</label>
                     <input type="date" id="arrivalDate" class="form-control">
-                </div>
-                
-                <div class="form-group">
-                    <label for="specialRequests"><i class="fas fa-comment-alt"></i> Special Requests (Optional)</label>
-                    <textarea id="specialRequests" class="form-control" rows="3" placeholder="Any special requirements?"></textarea>
                 </div>
                 
                 <button id="confirmBooking" class="btn" style="background-color: #2ecc71;">
                     <i class="fas fa-check-circle"></i> Confirm Booking
                 </button>
                 
-                <div class="price-display" style="margin-top: 30px; background-color: #e8f4fc;">
-                    <h4><i class="fas fa-lightbulb"></i> How It Works</h4>
-                    <p>1. Select number of guests and room type</p>
-                    <p>2. Click "Calculate Total Price" to see the price with our $20 service fee</p>
-                    <p>3. Fill in your details and confirm booking</p>
-                    <p>4. Tomorrow, we'll connect this to your actual Excel data via API</p>
+                <div class="instructions">
+                    <h5><i class="fas fa-info-circle"></i> How to Set Up Google Sheets Integration</h5>
+                    <ol>
+                        <li>Create a Google Sheet with room prices</li>
+                        <li>Enable Google Sheets API in Google Cloud Console</li>
+                        <li>Create an API key (no authentication required for public sheets)</li>
+                        <li>Share your Google Sheet publicly (Anyone with the link can view)</li>
+                        <li>Enter your Sheet ID and API key in the configuration panel</li>
+                        <li>Test the connection to verify it works</li>
+                    </ol>
+                    <p><strong>Google Sheet Format:</strong> Column A = Room Code (A, B, C, D), Column B = Room Name, Column C = Price</p>
                 </div>
             </div>
         </div>
     </div>
-    <script.src="logic.js"></script>
+
+    <script src="script.js"></script>
 </body>
 </html>
